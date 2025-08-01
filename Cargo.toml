@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "api",
+    "database",
+    "middlewares",
+    "models",
+    "repositories",
+    "utils",
+]
