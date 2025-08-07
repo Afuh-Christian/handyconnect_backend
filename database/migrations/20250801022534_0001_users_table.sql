@@ -2,6 +2,6 @@
 
 
 CREATE TABLE IF NOT EXISTS users (
-    "AppUserId" UUID PRIMARY KEY,
+    "app_user_id" UUID PRIMARY KEY,
     "username" TEXT NOT NULL UNIQUE
 );

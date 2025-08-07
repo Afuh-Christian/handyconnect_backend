@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "api",
+    "api", "custom_macros",
     "database",
     "middlewares",
     "models",

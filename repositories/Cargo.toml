@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+utils = { path = "../utils" }
+custom_macros = { path = "../custom_macros" }
+tokio = { version = "1.47.0", features = ["full"] }
+sqlx = { version = "0.8.6", features = ["derive", "macros", "runtime-tokio", "tls-native-tls", "migrate", "postgres"] }
+type_reflect = "0.6.2"
