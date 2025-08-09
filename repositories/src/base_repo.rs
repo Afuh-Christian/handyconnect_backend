@@ -89,7 +89,7 @@ where
 impl<T, IdType> BaseRepoTrait<T, IdType> for BaseRepo<T, IdType>
 where
     T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + HasId<IdType> , 
-    IdType:  for<'r> sqlx::Encode<'r, sqlx::Postgres> + sqlx::Type<sqlx::Postgres>, 
+    IdType: Send + Sync +  for<'r> sqlx::Encode<'r, sqlx::Postgres> + sqlx::Type<sqlx::Postgres>, 
 
     // IdType: Send + Sync + sqlx::Type<sqlx::Postgres> + Clone + Unpin,
 {
@@ -101,7 +101,7 @@ async fn get_by_id<'a>(
 where
     for<'q> &'q IdType: sqlx::Encode<'q, sqlx::Postgres> + sqlx::Type<sqlx::Postgres>
 {
-    sqlx::query_as::<_, T>(format!(
+   let data =  sqlx::query_as::<_, T>(format!(
         "SELECT * FROM {} WHERE {} = $1", self.table_name, self.id_name
     ).as_str())
         .bind(&id) // reference here
@@ -109,43 +109,46 @@ where
         .await
         .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
 
+
+    Ok(data)
+
 }
 
 
 
-    async fn add_or_update(&self, item: T) -> Result<T, ApiError> {
-        let id_value = item.id().clone();
+    // async fn add_or_update(&self, item: T) -> Result<T, ApiError> {
+    //     let id_value = item.id().clone();
 
-        let exists = sqlx::query_scalar::<_, bool>(&format!(
-            "SELECT EXISTS(SELECT 1 FROM {} WHERE {} = $1)",
-            self.table_name, self.id_name
-        ))
-        .bind(&id_value)
-        .fetch_one(&self.db_pool)
-        .await
-        .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
+    //     let exists = sqlx::query_scalar::<_, bool>(&format!(
+    //         "SELECT EXISTS(SELECT 1 FROM {} WHERE {} = $1)",
+    //         self.table_name, self.id_name
+    //     ))
+    //     .bind(&id_value)
+    //     .fetch_one(&self.db_pool)
+    //     .await
+    //     .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
 
-        if exists {
-            // Update logic (this example assumes you fill the fields manually)
-            sqlx::query(&format!(
-                "UPDATE {} SET /* your fields here */ WHERE {} = $1",
-                self.table_name, self.id_name
-            ))
-            .bind(&id_value)
-            .execute(&self.db_pool)
-            .await
-        .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
-        } else {
-            // Insert logic (you'll have to bind each field from `item`)
-            sqlx::query(&format!(
-                "INSERT INTO {} (/* columns */) VALUES (/* values */)",
-                self.table_name
-            ))
-            .execute(&self.db_pool)
-            .await
-        .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
-        }
+    //     if exists {
+    //         // Update logic (this example assumes you fill the fields manually)
+    //         sqlx::query(&format!(
+    //             "UPDATE {} SET /* your fields here */ WHERE {} = $1",
+    //             self.table_name, self.id_name
+    //         ))
+    //         .bind(&id_value)
+    //         .execute(&self.db_pool)
+    //         .await
+    //     .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
+    //     } else {
+    //         // Insert logic (you'll have to bind each field from `item`)
+    //         sqlx::query(&format!(
+    //             "INSERT INTO {} (/* columns */) VALUES (/* values */)",
+    //             self.table_name
+    //         ))
+    //         .execute(&self.db_pool)
+    //         .await
+    //     .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
+    //     }
 
-        Ok(item)
-    }
+    //     Ok(item)
+    // }
 }
