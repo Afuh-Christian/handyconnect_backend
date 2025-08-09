@@ -1,9 +1,10 @@
 [workspace]
 members = [
-    "api", "custom_macros",
+    "api", 
     "database",
     "middlewares",
     "models",
     "repositories",
-    "utils",
+    "utils", 
+    "custom_macros/procedural/field_names_derive",
 ]

@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-custom_macros = { path = "../custom_macros" }
+field_names_derive = { path = "../custom_macros/procedural/field_names_derive" }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.142"
-type_reflect = "0.6.2"
 uuid = { version = "1.17.0", features = ["serde"] }
+sqlx = { version = "0.8.6", features = ["derive", "macros", "runtime-tokio", "tls-native-tls", "migrate", "postgres"] }

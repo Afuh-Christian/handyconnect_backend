@@ -1,24 +1,13 @@
-use utils::op_result::OperationResult;
+use async_trait::async_trait;
+use sqlx::FromRow;
+use utils::api_errors::ApiError;
 
-
-
-
-pub trait BaseRepoTrait<T , IdType>
-where 
-T : FieldNames
+#[async_trait]
+pub trait BaseRepoTrait<T, IdType>
 {
-
-        // Define the methods that will be implemented by the repositories
-    fn get_all(&self) -> Result<Vec<T>, String>;
-    fn create(&self, item: T) -> Result<T, String>;
-    fn get(&self, id: IdType) -> Result<String, String>;
-    fn update(&self, id: IdType, item: T) -> Result<T, String>;
-    fn delete(&self, id: IdType) -> Result<OperationResult, String>;
-    fn save_list(&self, items : Vec<T>) -> Result<OperationResult, String>;
-    fn delete_list(&self, ids: Vec<IdType> ) -> Result<OperationResult, String>;
-     
-
-
+async  fn add_or_update(&self, item: T) -> Result<T, ApiError>;
+async fn get_by_id<'a>(
+    &self,
+    id: IdType
+) -> Result<T, ApiError>;
 }
-
-

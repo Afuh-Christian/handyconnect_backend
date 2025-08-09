@@ -1,100 +1,151 @@
+// use std::marker::PhantomData;
+// use actix_web::http::StatusCode;
+// use sqlx::{FromRow, PgPool};
+// use utils::api_errors::ApiError;
+// use async_trait::async_trait;
+// use crate::base_repo_trait::BaseRepoTrait;
+
+// pub struct BaseRepo<T, IdType> {
+//     table_name: String,
+//     id_name: String,
+//     db_pool: PgPool,
+//     _id: PhantomData<IdType>,
+//     _model: PhantomData<T>,
+// }
+
+// impl<T, IdType> BaseRepo<T, IdType>
+// where
+//     T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin,
+// {
+//     pub fn new(db_pool: PgPool, table_name: String,id_name: String) -> Self {
+//         Self {
+//             db_pool,
+//             table_name,
+//             id_name,
+//             _id: PhantomData,
+//             _model: PhantomData,
+//         }
+//     }
+// }
+
+
+
+
+
+// #[async_trait]
+// impl<T, IdType> BaseRepoTrait<T, IdType> for BaseRepo<T, IdType>
+// {
+   
+// fn add_or_update(&self, item: T) -> Result<T, ApiError>{
+
+
+//     // Implement the logic to add or update the item in the database
+//     // This is a placeholder implementation
+//     Ok(item)
+// }
+   
+// }
+
+
+
+
+
+
 use std::marker::PhantomData;
-
-use sqlx::PgPool;
-use utils::op_result::OperationResult;
-
+use actix_web::http::StatusCode;
+use sqlx::{FromRow, PgPool, postgres::PgQueryResult};
+use utils::api_errors::ApiError;
+use async_trait::async_trait;
 use crate::base_repo_trait::BaseRepoTrait;
 
-pub trait FieldNames {
-    fn field_names() -> &'static [&'static str];
+pub trait HasId<IdType> {
+    fn id(&self) -> &IdType;
 }
 
-
-pub struct BaseRepo<T , IdType>{
-
-//   pub db: DatabaseConnection,
-     pub table_name: String,
-     pub db_pool: PgPool,
-     _id: PhantomData<IdType>,
-     _model: PhantomData<T>,
-
-
+pub struct BaseRepo<T, IdType> {
+    table_name: String,
+    id_name: String,
+    db_pool: PgPool,
+    _id: PhantomData<IdType>,
+    _model: PhantomData<T>,
 }
 
-
-impl<T, IdType>  BaseRepo<T, IdType> where 
-T : FieldNames,
+impl<T, IdType> BaseRepo<T, IdType>
+where
+    T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin,
 {
-    
-    pub  fn new(db_pool: PgPool, table_name: String) -> Self {
+    pub fn new(db_pool: PgPool, table_name: String, id_name: String) -> Self {
         Self {
             db_pool,
             table_name,
+            id_name,
             _id: PhantomData,
             _model: PhantomData,
         }
-    }   
+    }
+}
+
+#[async_trait]
+impl<T, IdType> BaseRepoTrait<T, IdType> for BaseRepo<T, IdType>
+where
+    T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + HasId<IdType> , 
+    IdType:  for<'r> sqlx::Encode<'r, sqlx::Postgres> + sqlx::Type<sqlx::Postgres>, 
+
+    // IdType: Send + Sync + sqlx::Type<sqlx::Postgres> + Clone + Unpin,
+{
+
+async fn get_by_id<'a>(
+    &self,
+    id: IdType
+) -> Result<T, ApiError>
+where
+    for<'q> &'q IdType: sqlx::Encode<'q, sqlx::Postgres> + sqlx::Type<sqlx::Postgres>
+{
+    sqlx::query_as::<_, T>(format!(
+        "SELECT * FROM {} WHERE {} = $1", self.table_name, self.id_name
+    ).as_str())
+        .bind(&id) // reference here
+        .fetch_one(&self.db_pool)
+        .await
+        .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
+
 }
 
 
-impl <T : FieldNames, IdType>BaseRepoTrait<T, IdType> for BaseRepo<T, IdType> {
 
+    async fn add_or_update(&self, item: T) -> Result<T, ApiError> {
+        let id_value = item.id().clone();
 
+        let exists = sqlx::query_scalar::<_, bool>(&format!(
+            "SELECT EXISTS(SELECT 1 FROM {} WHERE {} = $1)",
+            self.table_name, self.id_name
+        ))
+        .bind(&id_value)
+        .fetch_one(&self.db_pool)
+        .await
+        .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
 
+        if exists {
+            // Update logic (this example assumes you fill the fields manually)
+            sqlx::query(&format!(
+                "UPDATE {} SET /* your fields here */ WHERE {} = $1",
+                self.table_name, self.id_name
+            ))
+            .bind(&id_value)
+            .execute(&self.db_pool)
+            .await
+        .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
+        } else {
+            // Insert logic (you'll have to bind each field from `item`)
+            sqlx::query(&format!(
+                "INSERT INTO {} (/* columns */) VALUES (/* values */)",
+                self.table_name
+            ))
+            .execute(&self.db_pool)
+            .await
+        .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
+        }
 
-
-
-    // Implement the methods defined in the BaseRepoTrait
-    fn get_all(&self) -> Result<Vec<T>, String> {
-        // Implementation here
-        let fields = T::field_names();
         Ok(item)
     }
-
-
-
-
-    fn create(&self, item: T) -> Result<T, String> {
-        // Implementation here
-
-        Ok(item)
-    }
-
-    fn get(&self, id: IdType) -> Result<String, String> {
-        // Implementation here
-        Ok("Item".to_string())
-    }
-
-    fn update(&self, id: IdType, item: T) -> Result<T, String> {
-        // Implementation here
-        Ok(item)
-    }
-
-    fn delete(&self, id: IdType) -> Result<OperationResult, String> {
-        // Implementation here
-          Ok(OperationResult{
-            error : None , 
-            success: true,
-            message: Some("Items deleted successfully".to_string()),
-        })
-    }
-
-    fn save_list(&self, items: Vec<T>) -> Result<OperationResult, String> {
-        // Implementation here
-          Ok(OperationResult{
-            error : None , 
-            success: true,
-            message: Some("Items saved successfully".to_string()),
-        })
-    }
-
-    fn delete_list(&self, ids: Vec<IdType>) -> Result<OperationResult, String> {
-        // Implementation here
-        Ok(OperationResult{
-            error : None , 
-            success: true,
-            message: Some("Item deleted successfully".to_string()),
-        })
-    }
-    
 }
