@@ -26,7 +26,7 @@ pub fn derive_columns_and_placeholders(input: TokenStream) -> TokenStream {
         (1..=col_names.len()).map(|i| format!("${}", i)).collect();
 
     let expanded = quote! {
-        impl #name {
+        impl ColumnsAndPlaceholdersTrait for #name {
             pub fn column_names() -> Vec<&'static str> {
                 vec![ #( #col_names ),* ]
             }
