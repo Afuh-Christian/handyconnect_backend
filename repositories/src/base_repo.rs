@@ -50,6 +50,8 @@ impl<T, IdType> BaseRepoTrait<T, IdType>
             Copy +
             Clone
 
+
+            
         // IdType: Send + Sync + sqlx::Type<sqlx::Postgres> + Clone + Unpin,
 {
     async fn get_by_id(&self, id: IdType) -> Result<T, ApiError>
