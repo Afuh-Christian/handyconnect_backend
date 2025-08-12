@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-field_names_derive = { path = "../custom_macros/procedural/field_names_derive" }
+derive_columns_and_placeholders = { path = "../custom_macros/procedural/derive_columns_and_placeholders" }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.142"
 uuid = { version = "1.17.0", features = ["serde"] }

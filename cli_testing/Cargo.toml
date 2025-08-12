@@ -1,0 +1,9 @@
+[package]
+name = "cli_testing"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+models = { path = "../models" }
+derive_columns_and_placeholders = { path = "../custom_macros/procedural/derive_columns_and_placeholders" }
+uuid = { version = "1.18.0", features = ["v4"] }

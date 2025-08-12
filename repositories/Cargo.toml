@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 utils = { path = "../utils" }
 models = { path = "../models" }
-field_names_derive = { path = "../custom_macros/procedural/field_names_derive" }
+derive_columns_and_placeholders = { path = "../custom_macros/procedural/derive_columns_and_placeholders" }
 tokio = { version = "1.47.0", features = ["full"] }
 sqlx = { version = "0.8.6", features = ["derive", "macros", "runtime-tokio", "tls-native-tls", "migrate", "postgres"] }
 async-trait = "0.1.88"

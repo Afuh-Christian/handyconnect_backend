@@ -6,5 +6,5 @@ members = [
     "models",
     "repositories",
     "utils", 
-    "custom_macros/procedural/field_names_derive",
+    "custom_macros/procedural/derive_columns_and_placeholders", "cli_testing",
 ]
