@@ -42,7 +42,7 @@ impl<T, IdType> BaseRepo<T, IdType>
 impl<T, IdType> BaseRepoTrait<T, IdType>
     for BaseRepo<T, IdType>
     where
-        T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + HasId<IdType>,
+        T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + HasId<IdType> + ColumnsAndPlaceholders,
         IdType: Send +
             Sync +
             for<'r> sqlx::Encode<'r, sqlx::Postgres> +
@@ -73,82 +73,52 @@ impl<T, IdType> BaseRepoTrait<T, IdType>
 
 
 
-
-    
-
     async fn add_or_update(&self, item: T) -> Result<T, ApiError> {
-        let id_value = item.id();
-        let exists = self.get_by_id(id_value.to_owned()).await.is_ok();
-        if exists {
-            // Update logic (this example assumes you fill the fields manually)
-            sqlx
-                ::query(
-                    &format!(
-                        "UPDATE {} SET /* your fields here */ WHERE {} = $1",
-                        self.table_name,
-                        self.id_name
-                    )
-                )
-                .bind(&id_value)
-                .execute(&self.db_pool).await
-                .map_err(|e| ApiError {
-                    message: "Error".to_owned(),
-                    error_code: Some(44),
-                    status_code: StatusCode::INTERNAL_SERVER_ERROR,
-                })?;
-        } else {
-            // Insert logic (you'll have to bind each field from `item`)
-            sqlx
-                ::query(
-                    &format!(
-                        "INSERT INTO {} (/* columns */) VALUES (/* values */)",
-                        self.table_name
-                    )
-                )
-                .execute(&self.db_pool).await
-                .map_err(|e| ApiError {
-                    message: "Error".to_owned(),
-                    error_code: Some(44),
-                    status_code: StatusCode::INTERNAL_SERVER_ERROR,
-                })?;
-        }
+    let columns = T::column_names();
+    let placeholders = T::placeholders();
+    let values = item.values();
 
-        Ok(item)
+    // Build the update assignments: col1 = EXCLUDED.col1, col2 = EXCLUDED.col2, ...
+    let update_assignments: Vec<String> = columns
+        .iter()
+        .map(|col| format!(r#""{}" = EXCLUDED."{}""#, col, col))
+        .collect();
+
+    // UPSERT query
+    let query_str = format!(
+        r#"
+        INSERT INTO {} ({})
+        VALUES ({})
+        ON CONFLICT ({}) DO UPDATE
+        SET {}
+        "#,
+        self.table_name,
+        columns.join(", "),
+        placeholders.join(", "),
+        self.id_name,
+        update_assignments.join(", ")
+    );
+
+    let mut query = sqlx::query(&query_str);
+
+    // Bind all values in order
+    for val in values {
+        query = query.bind(val);
     }
 
-    //
-    //     let id_value = item.id().clone();
+    query
+        .execute(&self.db_pool)
+        .await
+        .map_err(|_| ApiError {
+            message: "Error".to_owned(),
+            error_code: Some(44),
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
 
-    //     let exists = sqlx::query_scalar::<_, bool>(&format!(
-    //         "SELECT EXISTS(SELECT 1 FROM {} WHERE {} = $1)",
-    //         self.table_name, self.id_name
-    //     ))
-    //     .bind(&id_value)
-    //     .fetch_one(&self.db_pool)
-    //     .await
-    //     .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
+    Ok(item)
+}
 
-    //     if exists {
-    //         // Update logic (this example assumes you fill the fields manually)
-    //         sqlx::query(&format!(
-    //             "UPDATE {} SET /* your fields here */ WHERE {} = $1",
-    //             self.table_name, self.id_name
-    //         ))
-    //         .bind(&id_value)
-    //         .execute(&self.db_pool)
-    //         .await
-    //     .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
-    //     } else {
-    //         // Insert logic (you'll have to bind each field from `item`)
-    //         sqlx::query(&format!(
-    //             "INSERT INTO {} (/* columns */) VALUES (/* values */)",
-    //             self.table_name
-    //         ))
-    //         .execute(&self.db_pool)
-    //         .await
-    //     .map_err(|e| ApiError { message: "Error".to_owned(), error_code: Some(44), status_code: StatusCode::INTERNAL_SERVER_ERROR })?;
-    //     }
 
-    //     Ok(item)
-    // }
+
+
 }
