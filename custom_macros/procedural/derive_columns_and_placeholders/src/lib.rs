@@ -1,6 +1,9 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput};
+use models::column_place_holder_trait::ColumnsAndPlaceholdersTrait;
+
+
 
 #[proc_macro_derive(ColumnsAndPlaceholders)]
 pub fn derive_columns_and_placeholders(input: TokenStream) -> TokenStream {
