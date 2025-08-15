@@ -7,10 +7,12 @@ edition = "2024"
 derive_columns_and_placeholders = { path = "../custom_macros/procedural/derive_columns_and_placeholders" }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.142"
-uuid = { version = "1.17.0", features = ["serde"] }
-sqlx = { version = "0.8.6", features = ["derive", "macros", "runtime-tokio", "tls-native-tls", "migrate", "postgres"] }
+uuid = { version = "1.17.0", features = ["v4", "serde"] }
+sqlx = { version = "0.8.6", features = ["derive", "macros", "runtime-tokio", "tls-native-tls", "migrate", "postgres" , "uuid" ] }
 utils = { path = "../utils" }
 models = { path = "../models" }
+types = { path = "../types" }
 tokio = { version = "1.47.0", features = ["full"] }
 async-trait = "0.1.88"
 actix-web = "4.11.0"
+paste = "1.0.15"

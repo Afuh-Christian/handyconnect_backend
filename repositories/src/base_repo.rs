@@ -1,18 +1,14 @@
 use std::marker::PhantomData;
 use actix_web::http::StatusCode;
-use models::column_place_holder_trait::ColumnsAndPlaceholdersTrait;
+use types::{column_place_holder_trait::ColumnsAndPlaceholdersTrait};
 use sqlx::{ FromRow, PgPool };
 use utils::{ api_errors::ApiError, op_result::OperationResult };
 use async_trait::async_trait;
 use crate::base_repo_trait::BaseRepoTrait;
 
-pub trait HasId<IdType> {
-    fn id(&self) -> &IdType;
-}
-
 pub struct BaseRepo<T, IdType> {
-    table_name: String,
-    id_name: String,
+    table_name: &'static str,
+    id_name: &'static str,
     db_pool: PgPool,
     _id: PhantomData<IdType>,
     _model: PhantomData<T>,
@@ -20,15 +16,10 @@ pub struct BaseRepo<T, IdType> {
 
 impl<T, IdType> BaseRepo<T, IdType>
     where
-        T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin,
-        IdType: Send +
-            Sync +
-            for<'r> sqlx::Encode<'r, sqlx::Postgres> +
-            sqlx::Type<sqlx::Postgres> +
-            Copy +
-            Clone
+        T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin +  ColumnsAndPlaceholdersTrait,
+        IdType: Send +Sync + for<'r> sqlx::Encode<'r, sqlx::Postgres> +sqlx::Type<sqlx::Postgres> +Copy +Clone
 {
-    pub fn new(db_pool: PgPool, table_name: String, id_name: String) -> Self {
+    pub fn new(db_pool: PgPool, table_name: &'static str, id_name: &'static str) -> Self {
         Self {
             db_pool,
             table_name,
@@ -42,22 +33,12 @@ impl<T, IdType> BaseRepo<T, IdType>
 #[async_trait]
 impl<T, IdType> BaseRepoTrait<T, IdType>
     for BaseRepo<T, IdType>
-    where
-        T: Send +
-            Sync +
-            for<'r> FromRow<'r, sqlx::postgres::PgRow> +
-            Unpin +
-            HasId<IdType> +
-            ColumnsAndPlaceholdersTrait,
-        IdType: Send +
-            Sync +
-            for<'r> sqlx::Encode<'r, sqlx::Postgres> +
-            sqlx::Type<sqlx::Postgres> +
-            Copy +
-            Clone
+                 where
+        T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin +  ColumnsAndPlaceholdersTrait,
+        IdType: Send +Sync + for<'r> sqlx::Encode<'r, sqlx::Postgres> +sqlx::Type<sqlx::Postgres> +Copy +Clone
 {
     async fn get(&self, id: IdType) -> Result<T, ApiError>
-        where for<'q> &'q IdType: sqlx::Encode<'q, sqlx::Postgres> + sqlx::Type<sqlx::Postgres>
+        // where for<'q> &'q IdType: sqlx::Encode<'q, sqlx::Postgres> + sqlx::Type<sqlx::Postgres>
     {
         let data = sqlx
             ::query_as::<_, T>(
@@ -140,36 +121,49 @@ impl<T, IdType> BaseRepoTrait<T, IdType>
         Ok(OperationResult::default())
     }
 
-    async fn delete_list(&self, ids: Vec<IdType>) -> Result<OperationResult, ApiError> {
-        if ids.is_empty() {
-            return Ok(OperationResult::default());
-        }
 
-        let placeholders: Vec<String> = ids
-            .iter()
-            .enumerate()
-            .map(|(i, _)| format!("${}", i + 1))
-            .collect();
 
-        let query_str = format!(
-            "DELETE FROM {} WHERE {} IN ({})",
-            self.table_name,
-            self.id_name,
-            placeholders.join(", ")
-        );
 
-        sqlx
-            ::query(&query_str)
-            .bind_all(ids)
-            .execute(&self.db_pool).await
-            .map_err(|_| ApiError {
-                message: "Error".to_owned(),
-                error_code: Some(44),
-                status_code: StatusCode::INTERNAL_SERVER_ERROR,
-            })?;
-
-        Ok(OperationResult::default())
+async fn delete_list(&self, ids: Vec<IdType>) -> Result<OperationResult, ApiError> {
+    if ids.is_empty() {
+        return Ok(OperationResult::default());
     }
+
+    let placeholders: Vec<String> = ids
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("${}", i + 1))
+        .collect();
+
+    let query_str = format!(
+        "DELETE FROM {} WHERE {} IN ({})",
+        self.table_name,
+        self.id_name,
+        placeholders.join(", ")
+    );
+
+    let mut query = sqlx::query(&query_str);
+    for id in &ids {
+        query = query.bind(id);
+    }
+
+    query
+        .execute(&self.db_pool)
+        .await
+        .map_err(|_| ApiError {
+            message: "Error".to_owned(),
+            error_code: Some(44),
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
+
+    Ok(OperationResult::default())
+}
+
+
+
+
+
+
 
     async fn save_list(&self, items: Vec<T>) -> Result<OperationResult, ApiError> {
         if items.is_empty() {

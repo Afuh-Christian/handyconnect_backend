@@ -8,5 +8,5 @@ members = [
     "repositories",
     "utils", 
     "custom_macros/procedural/derive_columns_and_placeholders", 
-    "cli_testing",
+    "cli_testing", "types",
 ]

@@ -8,9 +8,11 @@ use crate::handlers::user_handlers::get_all;
     config.service(
         scope("/users")
         .service(get_all)
-        .route("/get_all", web::get().to(|| async {
-            HttpResponse::Ok().body("Get all users")
-        })),
+
+
+        // .route("/get_all", web::get().to(|| async {
+        //     HttpResponse::Ok().body("Get all users")
+        // })),
     );
 }
 

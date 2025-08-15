@@ -7,8 +7,11 @@ edition = "2024"
 utils =  { path = "../utils" }
 models =  { path = "../models" }
 database =  { path = "../database" }
+repositories =  { path = "../repositories" }
 actix-web = "4.11.0"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.141"
 tokio = { version = "1.47.0", features = ["full"] }
-sqlx = { version = "0.8.6", features = ["derive", "macros", "runtime-tokio", "tls-native-tls", "migrate", "postgres"] }
+uuid = { version = "1.17.0", features = ["v4", "serde"] }
+sqlx = { version = "0.8.6", features = ["derive", "macros", "runtime-tokio", "tls-native-tls", "migrate", "postgres" , "uuid" ] }
+paste = "1.0.15"

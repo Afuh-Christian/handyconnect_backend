@@ -1,8 +1,14 @@
 use async_trait::async_trait;
+use sqlx::FromRow;
+use types::{column_place_holder_trait::ColumnsAndPlaceholdersTrait};
 use utils::{api_errors::ApiError, op_result::OperationResult};
 
 #[async_trait]
-pub trait BaseRepoTrait<T, IdType> {
+pub trait BaseRepoTrait<T, IdType> 
+    where
+        T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin +  ColumnsAndPlaceholdersTrait,
+        IdType: Send +Sync + for<'r> sqlx::Encode<'r, sqlx::Postgres> +sqlx::Type<sqlx::Postgres> +Copy +Clone
+{
     async fn add_or_update(&self, item: T) -> Result<T, ApiError>;
     async fn get(&self, id: IdType) -> Result<T, ApiError>;
     async fn get_all(&self) -> Result<Vec<T>, ApiError>;
@@ -12,15 +18,15 @@ pub trait BaseRepoTrait<T, IdType> {
 }
 
 
-
-
-
 #[macro_export]
 macro_rules! delegate_base_repo {
     ($target:ident, $view:ty, $primary:ty) => {
+
+        use utils::{api_errors::ApiError, op_result::OperationResult};
+
         #[async_trait::async_trait]
         impl crate::base_repo_trait::BaseRepoTrait<$view, $primary> for $target {
-            async fn add_or_update(&self, item: $view) -> Result<$view, ApiError> {
+           async fn add_or_update(&self, item: $view) -> Result<$view, ApiError> {
                 self.base.add_or_update(item).await
             }
 

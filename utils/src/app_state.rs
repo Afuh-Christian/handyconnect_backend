@@ -1,5 +1,7 @@
+use sqlx::PgPool;
+
 
 
 pub struct AppState {
-    pub db_pool: sqlx::PgPool,
+    pub db_pool: PgPool ,
 }

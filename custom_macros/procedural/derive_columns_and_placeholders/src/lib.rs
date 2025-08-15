@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput};
-use models::column_place_holder_trait::ColumnsAndPlaceholdersTrait;
+use types::column_place_holder_trait::ColumnsAndPlaceholdersTrait;
 
 
 
@@ -29,14 +29,14 @@ pub fn derive_columns_and_placeholders(input: TokenStream) -> TokenStream {
         (1..=col_names.len()).map(|i| format!("${}", i)).collect();
 
     let expanded = quote! {
-        impl ColumnsAndPlaceholdersTrait for #name {
-            pub fn column_names() -> Vec<&'static str> {
+      impl ColumnsAndPlaceholdersTrait for #name {
+             fn column_names() -> Vec<&'static str> {
                 vec![ #( #col_names ),* ]
             }
-            pub fn placeholders() -> Vec<&'static str> {
+             fn placeholders() -> Vec<&'static str> {
                 vec![ #( #placeholders ),* ]
             }
-            pub fn values(&self) -> Vec<String> {
+             fn values(&self) -> Vec<String> {
                 vec![ #( self.#col_idents.to_string() ),* ]
             }
         }

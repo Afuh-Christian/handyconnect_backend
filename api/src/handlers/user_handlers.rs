@@ -1,14 +1,17 @@
-use actix_web::{HttpResponse, Responder};
-use actix_web:: {get, post, web};
+// use actix_web::{HttpResponse, Responder};
+use actix_web:: {get, post};
+
+use crate::base_handler; 
+base_handler!( app_user , AppUserRepository, AppUser);
 
 
 
-#[get("/")]
-async fn get_all() -> impl Responder {
 
 
-    
 
 
-    HttpResponse::Ok().body("Hello world!")
-}
+
+
+
+
+
