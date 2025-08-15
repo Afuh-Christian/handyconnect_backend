@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! base_handler {
     ($module:ident, $repo:ident, $model_dto:ident) => {
-        use actix_web::{ web::{Data , Path , Json}  , http::StatusCode , delete};
+        use actix_web::{ web::{Data , Path , Json}  , http::StatusCode ,get , post, delete};
         use uuid::Uuid;
         use utils::{api_errors::ApiError, app_state::AppState , op_result::OperationResult};
         use models::$module::$model_dto;
