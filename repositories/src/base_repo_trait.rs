@@ -1,7 +1,6 @@
 use async_trait::async_trait;
 use sqlx::FromRow;
-use types::{column_place_holder_trait::ColumnsAndPlaceholdersTrait};
-use utils::{api_errors::ApiError, op_result::OperationResult};
+use types::{column_place_holder_trait::ColumnsAndPlaceholdersTrait , api_errors::ApiError, op_result::OperationResult};
 
 #[async_trait]
 pub trait BaseRepoTrait<T, IdType> 
@@ -22,7 +21,8 @@ pub trait BaseRepoTrait<T, IdType>
 macro_rules! delegate_base_repo {
     ($target:ident, $view:ty, $primary:ty) => {
 
-        use utils::{api_errors::ApiError, op_result::OperationResult};
+        use types::{ api_errors::ApiError, op_result::OperationResult};
+
 
         #[async_trait::async_trait]
         impl crate::base_repo_trait::BaseRepoTrait<$view, $primary> for $target {

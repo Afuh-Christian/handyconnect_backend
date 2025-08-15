@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 utils =  { path = "../utils" }
+types =  { path = "../types" }
 models =  { path = "../models" }
 database =  { path = "../database" }
 repositories =  { path = "../repositories" }

@@ -1,5 +1,4 @@
 use actix_web::{HttpResponse, ResponseError, http::StatusCode};
-use serde::Serialize;
 use serde_json::json;
 use std::fmt;
 

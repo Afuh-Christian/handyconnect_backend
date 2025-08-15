@@ -1,5 +1,4 @@
 use std::fmt::Display;
-
 use actix_web::{body::{ BoxBody}, http::StatusCode, web, HttpResponse, Responder, ResponseError};
 
 #[derive(Debug)]
@@ -28,9 +27,6 @@ impl Responder for ApiResponse {
     }
     
 }
-
-
-
 
 impl Display for ApiResponse{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

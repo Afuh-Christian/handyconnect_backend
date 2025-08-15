@@ -1,7 +1,6 @@
-use sqlx::PgPool;
-
-
+use std::sync::Arc;
+use repositories::app_user_repo::AppUserRepository;
 
 pub struct AppState {
-    pub db_pool: PgPool ,
+    pub app_user_repo : Arc<AppUserRepository>
 }

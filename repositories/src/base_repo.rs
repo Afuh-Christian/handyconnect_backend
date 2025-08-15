@@ -1,8 +1,7 @@
 use std::marker::PhantomData;
 use actix_web::http::StatusCode;
-use types::{column_place_holder_trait::ColumnsAndPlaceholdersTrait};
+use types::{column_place_holder_trait::ColumnsAndPlaceholdersTrait , api_errors::ApiError, op_result::OperationResult};
 use sqlx::{ FromRow, PgPool };
-use utils::{ api_errors::ApiError, op_result::OperationResult };
 use async_trait::async_trait;
 use crate::base_repo_trait::BaseRepoTrait;
 
