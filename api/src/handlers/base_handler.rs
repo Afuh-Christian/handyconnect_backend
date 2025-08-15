@@ -1,8 +1,7 @@
 #[macro_export]
 macro_rules! base_handler {
-    ($module:ident, $repo:ident, $model_dto:ident) => {
+    ($module:ident, $repo:ident, $model_dto:ident,$id_type:ty) => {
         use actix_web::{ web::{Data , Path , Json}  , http::StatusCode ,get , post, delete};
-        use uuid::Uuid;
         use utils::{api_errors::ApiError, app_state::AppState , op_result::OperationResult};
         use models::$module::$model_dto;
         use repositories::base_repo_trait::BaseRepoTrait;
@@ -42,13 +41,13 @@ macro_rules! base_handler {
         }
 
 
-        #[get("/get/{uuid}")]
+        #[get("/get/{id}")]
         pub async fn get(
             app_state: Data<AppState>,
-            uuid: Path<Uuid>,
+            id: Path<$id_type>,
         ) -> Result<Json<$model_dto> , ApiError>  {
             let result = $repo::new(app_state.db_pool.clone())
-                .get(uuid.into_inner())
+                .get(id.into_inner())
                 .await
                 .map_err(|err| ApiError {
                     message: err.message.to_owned(),
@@ -59,13 +58,13 @@ macro_rules! base_handler {
         }
 
 
-        #[delete("/delete/{uuid}")]
+        #[delete("/delete/{id}")]
         pub async fn delete(
             app_state: Data<AppState>,
-            uuid: Path<Uuid>,
+            id: Path<$id_type>,
         ) -> Result<Json<OperationResult> , ApiError>  {
             let result = $repo::new(app_state.db_pool.clone())
-                .delete(uuid.into_inner())
+                .delete(id.into_inner())
                 .await
                 .map_err(|err| ApiError {
                     message: err.message.to_owned(),
@@ -94,7 +93,7 @@ macro_rules! base_handler {
         #[post("/delete_list")]
         pub async fn delete_list(
             app_state: Data<AppState>,
-            payload: Json<Vec<Uuid>>,
+            payload: Json<Vec<$id_type>>,
         ) -> Result<Json<OperationResult>, ApiError> {
               let result = $repo::new(app_state.db_pool.clone())
                 .delete_list(payload.into_inner())

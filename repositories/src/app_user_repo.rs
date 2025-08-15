@@ -11,7 +11,7 @@ pub struct AppUserRepository {
 
 impl AppUserRepository {
     pub fn new(db: PgPool) -> Self {
-        let base = BaseRepo::<AppUser, Uuid>::new(db, "app_user", "id");
+        let base = BaseRepo::<AppUser, Uuid>::new(db, "users", "id");
         Self { base }
     }
 }

@@ -97,6 +97,10 @@ impl<T, IdType> BaseRepoTrait<T, IdType>
     }
 
     async fn get_all(&self) -> Result<Vec<T>, ApiError> {
+
+        // private
+        print!("App users end point");
+
         let data = sqlx
             ::query_as::<_, T>(format!("SELECT * FROM {}", self.table_name).as_str())
             .fetch_all(&self.db_pool).await
