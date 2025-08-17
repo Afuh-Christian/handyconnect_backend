@@ -20,10 +20,24 @@ pub fn derive_columns_and_placeholders(input: TokenStream) -> TokenStream {
         .map(|f| f.ident.as_ref().unwrap().to_string())
         .collect();
 
-    let col_idents: Vec<_> = fields
-        .iter()
-        .map(|f| f.ident.as_ref().unwrap())
-        .collect();
+    // let col_idents: Vec<_> = fields
+    //     .iter()
+    //     .map(|f| f.ident.as_ref().unwrap())
+    //     .collect();
+
+
+
+let col_idents: Vec<_> = fields.iter().map(|f| {
+    let ident = f.ident.as_ref().unwrap();
+    match &f.ty {
+        syn::Type::Path(type_path) if type_path.path.segments[0].ident == "Option" => {
+            quote! { { match &self.#ident { Some(val) => val.to_string(), None => "NULL".to_string() } } }
+        }
+        _ => {
+            quote! { self.#ident.to_string() }
+        }
+    }
+}).collect();
 
     let placeholders: Vec<String> =
         (1..=col_names.len()).map(|i| format!("${}", i)).collect();
@@ -36,9 +50,9 @@ pub fn derive_columns_and_placeholders(input: TokenStream) -> TokenStream {
              fn placeholders() -> Vec<&'static str> {
                 vec![ #( #placeholders ),* ]
             }
-             fn values(&self) -> Vec<String> {
-                vec![ #( self.#col_idents.to_string() ),* ]
-            }
+      fn values(&self) -> Vec<String> {
+    vec![ #( #col_idents ),* ]
+}
         }
     };
     expanded.into()

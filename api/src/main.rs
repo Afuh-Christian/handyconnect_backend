@@ -3,7 +3,6 @@ use actix_web::{ web, App, HttpServer};
 use database::postgres::db_postgres_pool;
 use repositories::app_user_repo::AppUserRepository;
 use utils::app_state::AppState;
-
 mod routes;
 mod handlers;
 

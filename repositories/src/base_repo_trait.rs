@@ -20,10 +20,7 @@ pub trait BaseRepoTrait<T, IdType>
 #[macro_export]
 macro_rules! delegate_base_repo {
     ($target:ident, $view:ty, $primary:ty) => {
-
         use types::{ api_errors::ApiError, op_result::OperationResult};
-
-
         #[async_trait::async_trait]
         impl crate::base_repo_trait::BaseRepoTrait<$view, $primary> for $target {
            async fn add_or_update(&self, item: $view) -> Result<$view, ApiError> {

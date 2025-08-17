@@ -6,12 +6,15 @@ use derive_columns_and_placeholders::ColumnsAndPlaceholders;
 
 
 #[derive(Serialize , Deserialize , Debug  , Clone , FromRow , ColumnsAndPlaceholders )]
- pub struct AppUser {
+ pub struct Handyman {
     pub id: Uuid,
-    pub username: String,
-    pub emails: String,
-    pub phone_numbers: Option<String>,
-    pub password: String,
-    pub role_ids: String
+    pub app_user_id: Uuid,
+    pub location_id: Uuid,
+    pub profession_ids : Option<String>,
+    pub contact_infos: Option<String>,
+    pub payment_method_ids: Option<String>
     }
+
+    
+
 
