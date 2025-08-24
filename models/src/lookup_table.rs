@@ -6,5 +6,16 @@ use derive_columns_and_placeholders::ColumnsAndPlaceholders;
 #[derive(Serialize, Deserialize, Debug, Clone, FromRow, ColumnsAndPlaceholders)]
 pub struct LookupTable {
     pub lookup_table_id: i32,
+    pub language_lookup_data_id: i32,
     pub lookup_table_name: String,
 }
+
+
+
+#[derive(Serialize, Deserialize, Debug, Clone, FromRow, ColumnsAndPlaceholders)]
+pub struct LookupTableView {
+    pub lookup_table_id: i32,
+    pub lookup_table_name: String,
+}
+
+

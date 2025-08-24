@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
@@ -10,5 +11,6 @@ pub struct Rating {
     pub user_id: Uuid,
     pub handyman_id: Uuid,
     pub comment: Option<String>,
+  pub created_at: NaiveDateTime,
     pub score: i32,
 }

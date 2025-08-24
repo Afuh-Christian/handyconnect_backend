@@ -14,6 +14,7 @@ pub struct Task {
     pub profession_id: Uuid, // Now references a profession instead of a specific job
     pub description: Option<String>,
     pub cost: f64,
-    pub status: String,
-    pub completed_at: DateTime<Utc>,
+    pub status_id: i32,
+    pub created_at: DateTime<Utc>,
+    pub completed_at: DateTime<Utc>
 }

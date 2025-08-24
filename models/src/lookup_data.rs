@@ -7,7 +7,8 @@ use derive_columns_and_placeholders::ColumnsAndPlaceholders;
 pub struct LookupData {
     pub lookup_table_id: i32,
     pub lookup_data_id: i32,
-    pub lookup_data_name_by_languages : String,
+    pub language_lookup_data_id: i32,
+    pub lookup_data_name : String,
 }
 
 

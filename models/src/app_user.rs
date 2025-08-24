@@ -9,7 +9,7 @@ use derive_columns_and_placeholders::ColumnsAndPlaceholders;
  pub struct AppUser {
     pub id: Uuid,
     pub username: String,
-    pub emails: String,
+    pub email: String,
     pub phone_numbers: Option<String>,
     pub password: String,
     pub role_ids: String
