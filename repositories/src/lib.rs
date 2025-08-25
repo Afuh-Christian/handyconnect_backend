@@ -7,3 +7,4 @@ pub mod  location_repo;
 // pub mod  transaction_repo;
 pub mod  lookup_data_repo;
 pub mod  lookup_table_repo;
+pub mod  rating_repo;

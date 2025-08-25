@@ -5,3 +5,4 @@ pub mod location_handlers;
 // pub mod transaction_handlers;
 pub mod lookup_data_handlers;
 pub mod lookup_table_handlers;
+pub mod rating_handlers;

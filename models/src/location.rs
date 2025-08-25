@@ -11,9 +11,3 @@ pub struct Location {
     pub latitude: f64,
     pub address: Option<String>
 }
-
-
-
-
-
-
