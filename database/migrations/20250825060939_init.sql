@@ -31,6 +31,14 @@
 -- );
 
 
+
+--location 
+
+
+
+
+
+
 CREATE TABLE IF NOT EXISTS public.handymen
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -40,8 +48,7 @@ CREATE TABLE IF NOT EXISTS public.handymen
     ratings JSONB,
     contact_infos JSONB,
     payment_methods JSONB,
-    CONSTRAINT fk_app_user FOREIGN KEY (app_user_id) REFERENCES public.app_users(id),
-    CONSTRAINT fk_location FOREIGN KEY (location_id) REFERENCES public.locations(location_id)
+    CONSTRAINT fk_app_user FOREIGN KEY (app_user_id) REFERENCES public."AspNetUsers"("Id")
 );
 
 CREATE INDEX idx_handymen_profession_ids
@@ -49,10 +56,8 @@ ON public.handymen USING GIN (profession_ids);
 
 
 
+--- location 
 
-
-
---location 
 
 CREATE TABLE IF NOT EXISTS public.location
 (
@@ -64,7 +69,7 @@ CREATE TABLE IF NOT EXISTS public.location
     CONSTRAINT location_pkey PRIMARY KEY (id),
     CONSTRAINT location_handyman_id_key UNIQUE (handyman_id),
     CONSTRAINT location_handyman_id_fkey FOREIGN KEY (handyman_id)
-        REFERENCES public.handymen (id) MATCH SIMPLE
+        REFERENCES public."handymen" ("id") MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
 );
@@ -99,21 +104,44 @@ CREATE TABLE IF NOT EXISTS public.lookup_table (
 
 
 
-
 -- lookup_data
 
+-- lookup_table
+--
+--CREATE TABLE IF NOT EXISTS public.lookup_table (
+--    -- Primary Key: Uniquely identifies each lookup table.
+--    lookup_table_id INTEGER NOT NULL,
+--    language_lookup_data_id INTEGER NOT NULL,
+--    lookup_table_name VARCHAR(255) NOT NULL,
+--
+--    CONSTRAINT lookup_table_pkey PRIMARY KEY (lookup_table_id , language_lookup_data_id)
+--);
+--
+--
+
+
+
+
+
+
+
+
+-- The `lookup_data` table with the corrected foreign key constraint.
 CREATE TABLE IF NOT EXISTS public.lookup_data (
     lookup_data_id INTEGER NOT NULL,
     lookup_table_id INTEGER NOT NULL,
     language_lookup_data_id INTEGER NOT NULL,
     lookup_data_name VARCHAR(255) NOT NULL,
     description TEXT , 
+    
     CONSTRAINT lookup_data_pkey PRIMARY KEY (lookup_data_id, language_lookup_data_id),
+    
+    -- Corrected foreign key: It must reference the full composite primary key
+    -- of the `lookup_table` table, which is (lookup_table_id, language_lookup_data_id).
     CONSTRAINT fk_lookup_table_id
-        FOREIGN KEY (lookup_table_id)
-        REFERENCES public.lookup_tables(lookup_table_id)
+        FOREIGN KEY (lookup_table_id, language_lookup_data_id)
+        REFERENCES public.lookup_table(lookup_table_id, language_lookup_data_id)
 );
-
 
 
 
@@ -141,12 +169,95 @@ CREATE TABLE IF NOT EXISTS public.ratings (
 
     -- Add foreign key constraints to link to other tables for data integrity
     CONSTRAINT fk_user
-        FOREIGN KEY (user_id) REFERENCES public.users(id),
+        FOREIGN KEY (app_user_id) REFERENCES public."AspNetUsers" ("Id"),
     CONSTRAINT fk_handyman
-        FOREIGN KEY (handyman_id) REFERENCES public.handymen(id),
-    CONSTRAINT fk_profession
-        FOREIGN KEY (profession_id) REFERENCES public.lookup_data(lookup_data_id)
+        FOREIGN KEY (handyman_id) REFERENCES public.handymen(id)
+--        ,
+--    CONSTRAINT fk_profession
+--        FOREIGN KEY (profession_id) REFERENCES public.lookup_data(lookup_data_id)
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- transactions .. 
+
+-- This SQL script creates the `transactions` table.
+CREATE TABLE IF NOT EXISTS public.transactions (
+    -- Primary Key: A unique identifier for each transaction.
+    transaction_id UUID PRIMARY KEY,
+
+    -- A unique, human-readable identifier for the transaction.
+    transaction_number VARCHAR(255) UNIQUE NOT NULL,
+
+    -- Foreign Key: The user or entity who sent the transaction.
+    sender_id UUID,
+    
+    -- Foreign Key: The user or entity who received the transaction.
+    recipient_id UUID,
+
+    -- The transaction amount, using a floating-point type.
+    amount FLOAT NOT NULL,
+
+    -- The fee charged by the platform.
+    platform_fee FLOAT,
+
+    -- The amount the recipient actually receives after fees.
+    recipient_earnings FLOAT,
+
+    -- Foreign Key: The currency used in the transaction.
+    currency_id INTEGER NOT NULL,
+
+    -- Foreign Key: The current status of the transaction (e.g., pending, completed).
+    transaction_status_id INTEGER NOT NULL,
+
+    -- Foreign Key: The payment method used (e.g., credit card, mobile money).
+    payment_method_id INTEGER NOT NULL,
+
+    -- Foreign Key: The third-party payment provider used.
+    provider_id INTEGER,
+
+    -- A reference string for the transaction, often from the payment provider.
+    reference VARCHAR(255) NOT NULL,
+
+    -- Optional: The account number of the payer.
+    payer_account VARCHAR(255),
+
+    -- Optional: The account number of the recipient.
+    recipient_account VARCHAR(255),
+
+    -- Timestamps for when the transaction was created and last updated.
+    -- `TIMESTAMP WITH TIME ZONE` is used to correctly handle `DateTime<Utc>`.
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+
+    -- Add foreign key constraints to link to other tables.
+    CONSTRAINT fk_sender
+        FOREIGN KEY (sender_id) REFERENCES public."AspNetUsers"("Id"),
+    CONSTRAINT fk_recipient
+        FOREIGN KEY (recipient_id) REFERENCES public."AspNetUsers"("Id")
+--        ,
+--    CONSTRAINT fk_currency
+--        FOREIGN KEY (currency_id) REFERENCES public.lookup_data(lookup_data_id),
+--    CONSTRAINT fk_transaction_status
+--        FOREIGN KEY (transaction_status_id) REFERENCES public.lookup_data(lookup_data_id),
+--    CONSTRAINT fk_payment_method
+--        FOREIGN KEY (payment_method_id) REFERENCES public.lookup_data(lookup_data_id),
+--    CONSTRAINT fk_provider
+--        FOREIGN KEY (provider_id) REFERENCES public.lookup_data(lookup_data_id)
+);
+
+
 
 
 --messages
