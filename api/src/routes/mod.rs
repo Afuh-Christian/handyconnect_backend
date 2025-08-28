@@ -1,2 +1,9 @@
-pub mod  user_routes;
+pub mod user_routes;
 pub mod app_routes;
+pub mod base_routes;
+pub mod location_routes;
+pub mod transaction_routes;
+pub mod handyman_routes;
+pub mod rating_routes;
+pub mod lookup_data_routes;
+pub mod lookup_table_routes;

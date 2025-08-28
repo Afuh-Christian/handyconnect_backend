@@ -5,8 +5,8 @@ use types::{column_place_holder_trait::ColumnsAndPlaceholdersTrait , api_errors:
 #[async_trait]
 pub trait BaseRepoTrait<T, IdType> 
     where
-        T: Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin +  ColumnsAndPlaceholdersTrait,
-        IdType: Send +Sync + for<'r> sqlx::Encode<'r, sqlx::Postgres> +sqlx::Type<sqlx::Postgres> +Copy +Clone
+        T : Send + Sync + for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin +  ColumnsAndPlaceholdersTrait ,
+        IdType : Send + Sync + for<'r> sqlx::Encode<'r, sqlx::Postgres> + sqlx::Type<sqlx::Postgres> + Copy + Clone
 {
     async fn add_or_update(&self, item: T) -> Result<T, ApiError>;
     async fn get(&self, id: IdType) -> Result<T, ApiError>;

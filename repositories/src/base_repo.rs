@@ -127,7 +127,7 @@ impl<T, IdType> BaseRepoTrait<T, IdType>
 
 
 
-async fn delete_list(&self, ids: Vec<IdType>) -> Result<OperationResult, ApiError> {
+async fn delete_list(&self, ids: Vec<IdType>) -> Result<OperationResult, ApiError> { 
     if ids.is_empty() {
         return Ok(OperationResult::default());
     }
@@ -145,7 +145,7 @@ async fn delete_list(&self, ids: Vec<IdType>) -> Result<OperationResult, ApiErro
         placeholders.join(", ")
     );
 
-    let mut query = sqlx::query(&query_str);
+    let mut query = sqlx::query(&query_str); 
     for id in &ids {
         query = query.bind(id);
     }

@@ -6,9 +6,9 @@ use crate::{base_route};
     pub fn config(config: &mut web::ServiceConfig) {
 
     config.service(
-        base_route!(user)
+        base_route!(transaction)
         .route("/hey", web::get().to(|| async {
-            HttpResponse::Ok().body("Get all users")
+            HttpResponse::Ok().body("Get all transactions")
         })),
 
 
