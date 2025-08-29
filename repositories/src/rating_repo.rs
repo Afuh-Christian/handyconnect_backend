@@ -11,7 +11,7 @@ pub struct RatingRepository {
 
 impl RatingRepository {
     pub fn new(db: PgPool) -> Self {
-        let base = BaseRepo::<Rating, Uuid>::new(db, "rating", "user_id");
+        let base = BaseRepo::<Rating, Uuid>::new(db, "ratings", "user_id");
         Self { base }
     }
 }

@@ -11,7 +11,7 @@ pub struct LookupDataRepository {
 
 impl LookupDataRepository {
     pub fn new(db: PgPool) -> Self {
-        let base = BaseRepo::<LookupData, Uuid>::new(db, "lookupData", "id");
+        let base = BaseRepo::<LookupData, Uuid>::new(db, "lookup_data", "id");
         Self { base }
     }
 }

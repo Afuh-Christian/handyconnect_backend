@@ -11,7 +11,7 @@ pub struct LocationRepository {
 
 impl LocationRepository {
     pub fn new(db: PgPool) -> Self {
-        let base = BaseRepo::<Location, Uuid>::new(db, "handymen", "id");
+        let base = BaseRepo::<Location, Uuid>::new(db, "location", "id");
         Self { base }
     }
 }

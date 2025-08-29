@@ -15,8 +15,5 @@ use crate::routes::{handyman_routes, location_routes, lookup_data_routes, lookup
         .configure(rating_routes::config)
         .configure(lookup_data_routes::config)
         .configure(lookup_table_routes::config)
-        
-
-        
         ;
     }
